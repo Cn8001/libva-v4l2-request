@@ -85,6 +85,14 @@ VAStatus RequestCreateSurfaces2(VADriverContextP context, unsigned int format,
 		if (found)
 			video_format = video_format_find(V4L2_PIX_FMT_NV12);
 
+		if (video_format == NULL) {
+			found = v4l2_find_format(driver_data->video_fd,
+						 V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE,
+						 V4L2_PIX_FMT_NV12M_COL128);
+			if (found)
+				video_format = video_format_find(V4L2_PIX_FMT_NV12M_COL128);
+		}
+
 		if (video_format == NULL)
 			return VA_STATUS_ERROR_OPERATION_FAILED;
 
