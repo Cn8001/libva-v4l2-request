@@ -7,6 +7,8 @@
  * more changes. So keep them private until they are stable and ready to
  * become part of the official public API.
  */
+#ifndef __LINUX_V4L2_CONTROLS_H
+
 
 #ifndef _HEVC_CTRLS_H_
 #define _HEVC_CTRLS_H_
@@ -27,6 +29,7 @@
 #define V4L2_HEVC_SLICE_TYPE_P	1
 #define V4L2_HEVC_SLICE_TYPE_I	2
 
+#ifndef V4L2_HEVC_STATELESS_HEVC_SPS
 /* The controls are not stable at the moment and will likely be reworked. */
 struct v4l2_ctrl_hevc_sps {
 	/* ISO/IEC 23008-2, ITU-T Rec. H.265: Sequence parameter set */
@@ -98,12 +101,15 @@ struct v4l2_ctrl_hevc_pps {
 	__u8	padding;
 };
 
+#endif
+
 #define V4L2_HEVC_DPB_ENTRY_RPS_ST_CURR_BEFORE	0x01
 #define V4L2_HEVC_DPB_ENTRY_RPS_ST_CURR_AFTER	0x02
 #define V4L2_HEVC_DPB_ENTRY_RPS_LT_CURR		0x03
 
 #define V4L2_HEVC_DPB_ENTRIES_NUM_MAX		16
 
+#ifndef V4L2_HEVC_STATELESS_HEVC_SPS
 struct v4l2_hevc_dpb_entry {
 	__u64	timestamp;
 	__u8	rps;
@@ -181,5 +187,6 @@ struct v4l2_ctrl_hevc_slice_params {
 
 	__u8	padding[2];
 };
-
+#endif
+#endif
 #endif
