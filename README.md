@@ -100,16 +100,19 @@ On the Pi, HEVC decoding has been verified bit-exact against software
 decoding at 720p and 1080p. H264 and MPEG2 still compile and probe,
 but the Pi has no stateless hardware for them.
 
-Important: this backend only works with stateless decoders (the V4L2
-Request API), because that is the model VA-API maps onto: the
-application parses the bitstream and hands pre-parsed parameters to
-the hardware for every frame. Stateful V4L2 decoders are a different
-interface where the hardware parses the bitstream itself, and they
-cannot be driven through this backend. Concretely, on a Raspberry Pi
-4/400 the H264 decoder (bcm2835-codec) is stateful, so HEVC via
-rpivid is the only codec this backend can accelerate there. For
-stateful decoders use them directly instead, for example FFmpeg's
-h264_v4l2m2m decoder.
+Note for Raspberry Pi 4/400 users: only HEVC gets hardware decoding
+through this backend on a Pi. The format list above describes what
+the backend can translate, but it only works with stateless decoders
+(the V4L2 Request API), because that is the model VA-API maps onto:
+the application parses the bitstream and hands pre-parsed parameters
+to the hardware for every frame. The only stateless decoder on the Pi
+is rpivid (HEVC). The Pi's H264 decoder (bcm2835-codec) is stateful,
+meaning the hardware parses the bitstream itself, which is a
+different V4L2 interface this backend cannot drive. For H264 on the
+Pi use the stateful decoder directly instead, for example FFmpeg's
+h264_v4l2m2m decoder or mpv with --hwdec=v4l2m2m-copy. The full
+MPEG2, H264 and H265 list applies to boards whose kernel driver
+exposes all three as stateless decoders, such as Allwinner (cedrus).
 
 Known limitations:
 * Frames split into multiple slices only submit the parameters of the
