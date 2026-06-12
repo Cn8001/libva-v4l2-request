@@ -41,6 +41,7 @@
 #include <errno.h>
 
 #include <sys/ioctl.h>
+#include <sys/mman.h>
 
 #include <linux/videodev2.h>
 
@@ -219,6 +220,44 @@ VAStatus RequestBeginPicture(VADriverContextP context, VAContextID context_id,
 
 	if (surface_object->status == VASurfaceRendering)
 		RequestSyncSurface(context, surface_id);
+
+	/*
+	 * Surfaces created after the context (the usual case with modern
+	 * libva clients) have no source buffer yet: attach one from the
+	 * context's pool. Decoding is synchronous, so sharing pool buffers
+	 * between surfaces is safe.
+	 */
+	if (surface_object->source_data == NULL) {
+		struct video_format *video_format = driver_data->video_format;
+		unsigned int output_type;
+		unsigned int length, offset, index;
+		void *source_data;
+		int rc;
+
+		if (video_format == NULL ||
+		    context_object->source_buffers_count == 0)
+			return VA_STATUS_ERROR_OPERATION_FAILED;
+
+		output_type = v4l2_type_video_output(video_format->v4l2_mplane);
+
+		index = context_object->source_index_base +
+			(context_object->source_next++ %
+			 context_object->source_buffers_count);
+
+		rc = v4l2_query_buffer(driver_data->video_fd, output_type,
+				       index, &length, &offset, 1);
+		if (rc < 0)
+			return VA_STATUS_ERROR_ALLOCATION_FAILED;
+
+		source_data = mmap(NULL, length, PROT_READ | PROT_WRITE,
+				   MAP_SHARED, driver_data->video_fd, offset);
+		if (source_data == MAP_FAILED)
+			return VA_STATUS_ERROR_ALLOCATION_FAILED;
+
+		surface_object->source_index = index;
+		surface_object->source_data = source_data;
+		surface_object->source_size = length;
+	}
 
 	surface_object->status = VASurfaceRendering;
 	context_object->render_surface_id = surface_id;

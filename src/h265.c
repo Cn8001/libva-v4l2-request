@@ -270,7 +270,13 @@ static void h265_fill_slice_params(VAPictureParameterBufferHEVC *picture,
 
 	memset(slice_params, 0, sizeof(*slice_params));
 
-	slice_params->bit_size = slice->slice_data_size * 8;
+	/*
+	 * bit_size covers the slice data payload located after
+	 * data_byte_offset (the driver checks that offset + size fits
+	 * within the queued buffer).
+	 */
+	slice_params->bit_size = (slice->slice_data_size -
+				  slice->slice_data_byte_offset) * 8;
 	slice_params->data_byte_offset =
 		slice->slice_data_offset + slice->slice_data_byte_offset;
 	slice_params->num_entry_point_offsets = slice->num_entry_point_offsets;

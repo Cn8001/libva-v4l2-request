@@ -44,3 +44,5 @@ configure
 depcomp
 TAGS
 error-fix
+
+build/

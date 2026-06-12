@@ -44,6 +44,15 @@ struct object_context {
 	VASurfaceID *surfaces_ids;
 	int surfaces_count;
 
+	/*
+	 * Pool of V4L2 output (bitstream) buffers, attached to surfaces
+	 * lazily: modern libva clients create contexts with no render
+	 * targets and add surfaces dynamically afterwards.
+	 */
+	unsigned int source_index_base;
+	unsigned int source_buffers_count;
+	unsigned int source_next;
+
 	int picture_width;
 	int picture_height;
 	int flags;
