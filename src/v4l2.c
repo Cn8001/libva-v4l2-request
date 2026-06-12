@@ -413,6 +413,12 @@ int v4l2_dequeue_buffer(int video_fd, int request_fd, unsigned int type,
 						buffer.bytesused,
 		    (buffer.flags & V4L2_BUF_FLAG_ERROR) ? " (ERROR)" : "");
 
+	if (buffer.flags & V4L2_BUF_FLAG_ERROR) {
+		request_log("Dequeued buffer %u (type %u) with error flag\n",
+			    buffer.index, type);
+		return -1;
+	}
+
 	return 0;
 }
 
