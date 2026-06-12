@@ -27,4 +27,8 @@ void tiled_deinterleave_to_planar(void *src, void *dst1, void *dst2,
 				  unsigned int dst_pitch, unsigned int width,
 				  unsigned int height);
 
+void sand_to_planar(void *src, void *dst, unsigned int dst_pitch,
+		    unsigned int col_stride, unsigned int width,
+		    unsigned int height);
+
 #endif

@@ -39,9 +39,7 @@
 
 #include <linux/videodev2.h>
 
-#include <mpeg2-ctrls.h>
-#include <h264-ctrls.h>
-#include <hevc-ctrls.h>
+#include <linux/v4l2-controls.h>
 
 #include "utils.h"
 #include "v4l2.h"
@@ -104,7 +102,7 @@ VAStatus RequestCreateContext(VADriverContextP context, VAConfigID config_id,
 	case VAProfileH264ConstrainedBaseline:
 	case VAProfileH264MultiviewHigh:
 	case VAProfileH264StereoHigh:
-		pixelformat = V4L2_PIX_FMT_H264_SLICE_RAW;
+		pixelformat = V4L2_PIX_FMT_H264_SLICE;
 		break;
 
 	case VAProfileHEVCMain:
@@ -123,12 +121,25 @@ VAStatus RequestCreateContext(VADriverContextP context, VAConfigID config_id,
 		goto error;
 	}
 
+	/*
+	 * Modern libva clients (e.g. FFmpeg) create the context without
+	 * render targets and create surfaces dynamically afterwards, so
+	 * make sure the output queue gets a usable buffer pool either way.
+	 * Decoding is synchronous (EndPicture waits for the request), so a
+	 * small shared pool is sufficient.
+	 */
 	rc = v4l2_create_buffers(driver_data->video_fd, output_type,
-				 surfaces_count, &index_base);
+				 surfaces_count > 0 ? surfaces_count : 4,
+				 &index_base);
 	if (rc < 0) {
 		status = VA_STATUS_ERROR_ALLOCATION_FAILED;
 		goto error;
 	}
+
+	context_object->source_index_base = index_base;
+	context_object->source_buffers_count =
+		surfaces_count > 0 ? surfaces_count : 4;
+	context_object->source_next = 0;
 
 	/*
 	 * The surface_ids array has been allocated by the caller and

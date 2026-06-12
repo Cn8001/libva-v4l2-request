@@ -26,6 +26,17 @@
 #define _VIDEO_H_
 
 #include <stdbool.h>
+#include <stdint.h>
+
+#include <linux/videodev2.h>
+
+/*
+ * Raspberry Pi downstream pixel format: NV12 in 128-byte wide columns
+ * (SAND128), two-planar variant. Not present in mainline uapi headers.
+ */
+#ifndef V4L2_PIX_FMT_NV12M_COL128
+#define V4L2_PIX_FMT_NV12M_COL128 v4l2_fourcc('N', 'c', '1', '2')
+#endif
 
 struct video_format {
 	char *description;

@@ -169,6 +169,13 @@ int v4l2_set_format(int video_fd, unsigned int type, unsigned int pixelformat,
 		return -1;
 	}
 
+	request_log("DEBUG s_fmt type=%u fourcc=%.4s %ux%u -> %ux%u\n", type,
+		    (char *)&pixelformat, width, height,
+		    v4l2_type_is_mplane(type) ? format.fmt.pix_mp.width :
+						format.fmt.pix.width,
+		    v4l2_type_is_mplane(type) ? format.fmt.pix_mp.height :
+						format.fmt.pix.height);
+
 	return 0;
 }
 
@@ -259,6 +266,9 @@ int v4l2_create_buffers(int video_fd, unsigned int type,
 			    strerror(errno));
 		return -1;
 	}
+
+	request_log("DEBUG create_bufs type=%u requested=%u created=%u index=%u\n",
+		    type, buffers_count, buffers.count, buffers.index);
 
 	if (index_base != NULL)
 		*index_base = buffers.index;
@@ -397,6 +407,18 @@ int v4l2_dequeue_buffer(int video_fd, int request_fd, unsigned int type,
 		return -1;
 	}
 
+	request_log("DEBUG dqbuf type=%u index=%u flags=0x%x bytesused=%u%s\n",
+		    type, buffer.index, buffer.flags,
+		    v4l2_type_is_mplane(type) ? planes[0].bytesused :
+						buffer.bytesused,
+		    (buffer.flags & V4L2_BUF_FLAG_ERROR) ? " (ERROR)" : "");
+
+	if (buffer.flags & V4L2_BUF_FLAG_ERROR) {
+		request_log("Dequeued buffer %u (type %u) with error flag\n",
+			    buffer.index, type);
+		return -1;
+	}
+
 	return 0;
 }
 
@@ -467,10 +489,12 @@ int v4l2_set_stream(int video_fd, unsigned int type, bool enable)
 	rc = ioctl(video_fd, enable ? VIDIOC_STREAMON : VIDIOC_STREAMOFF,
 		   &buf_type);
 	if (rc < 0) {
-		request_log("Unable to %sable stream: %s\n",
-			    enable ? "en" : "dis", strerror(errno));
+		request_log("Unable to %sable stream for type %u: %s\n",
+			    enable ? "en" : "dis", type, strerror(errno));
 		return -1;
 	}
+
+	request_log("DEBUG stream%s type=%u\n", enable ? "on" : "off", type);
 
 	return 0;
 }

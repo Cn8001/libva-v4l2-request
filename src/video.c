@@ -55,6 +55,16 @@ static struct video_format formats[] = {
 		.planes_count		= 2,
 		.bpp			= 16
 	},
+	{
+		.description		= "Broadcom SAND128 column-tiled NV12 YUV",
+		.v4l2_format		= V4L2_PIX_FMT_NV12M_COL128,
+		.v4l2_buffers_count	= 2,
+		.v4l2_mplane		= true,
+		.drm_format		= DRM_FORMAT_NV12,
+		.drm_modifier		= DRM_FORMAT_MOD_BROADCOM_SAND128,
+		.planes_count		= 2,
+		.bpp			= 16
+	},
 };
 
 static unsigned int formats_count = sizeof(formats) / sizeof(formats[0]);

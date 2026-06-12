@@ -11,6 +11,8 @@
 #ifndef _H264_CTRLS_H_
 #define _H264_CTRLS_H_
 
+#ifndef __LINUX_V4L2_CONTROLS_H
+
 #include <linux/videodev2.h>
 
 /* Our pixel format isn't stable at the moment */
@@ -194,4 +196,5 @@ struct v4l2_ctrl_h264_decode_params {
 	__u32 flags; /* V4L2_H264_DECODE_PARAM_FLAG_* */
 };
 
+#endif
 #endif

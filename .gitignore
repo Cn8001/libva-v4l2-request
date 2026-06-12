@@ -43,3 +43,7 @@ config.sub
 configure
 depcomp
 TAGS
+error-fix
+
+build/
+DEVLOG*
